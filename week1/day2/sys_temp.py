@@ -1,45 +1,82 @@
 import os
-from pathlib import Path
 from dotenv import load_dotenv
 from groq import Groq
 
+# Load environment variables
 load_dotenv()
-my_api_key=os.getenv("GROQ_API_KEY")
 
-if not my_api_key:
-    raise ValueError("API key kaha hai bhai")
+# Get API Key
+api_key = os.getenv("GROQ_API_KEY")
 
-client=Groq(api_key=my_api_key)
+if not api_key:
+    raise ValueError("❌ GROQ_API_KEY not found in .env file")
 
-model="llama-3.3-70b-versatile"
-role="user"
-prompt="Suggest me one name for my cloth company"
+# Create Groq client
+client = Groq(api_key=api_key)
 
-message_system={
-"role":"system",
-# "content":"You are my loving girlfriend "
+# Model
+model = "llama-3.3-70b-versatile"
 
-"content":"You are a brand manager who suggest name for the food company. name should in one word .and suggest only one name "
+# User Prompt
+prompt = """
+Suggest a brand name for my AI-powered platform where students and teachers can
+visualize code execution step by step to understand Data Structures,
+Algorithms, and programming concepts.
+"""
 
+# System Prompt
+message_system = {
+    "role": "system",
+    "content": """
+You are the world's best startup branding expert.
+
+Your task is to generate ONE premium brand name for an AI-powered EdTech platform.
+
+The platform allows:
+- Students to visualize code execution.
+- Teachers to explain algorithms visually.
+- Interactive execution of Data Structures and Algorithms.
+- AI-powered code explanations.
+- Learning programming through visualization.
+
+Naming Rules:
+1. Return ONLY ONE brand name.
+2. The name must be a SINGLE WORD.
+3. Between 5 and 10 letters.
+4. Easy to pronounce.
+5. Easy to remember.
+6. Modern and premium.
+7. Suitable for a global tech startup.
+8. Avoid generic words like Code, Learn, Algo, Study, Visual.
+9. Prefer names inspired by intelligence, flow, logic, thinking, neurons, execution, or imagination.
+10. Avoid existing famous company names.
+11. Do not include any explanation, quotation marks, numbering, or extra text.
+"""
 }
 
-
-# message me role and content
-message={
-    "role": role,
+# User Message
+message_user = {
+    "role": "user",
     "content": prompt
 }
 
-# System role
+messages = [message_system, message_user]
 
-messages=[message_system,message]
-messages=[message_system,message]
+try:
+    response = client.chat.completions.create(
+        model=model,
+        messages=messages,
+        temperature=2,
+        max_tokens=20
+    )
 
-#  temperatur by default is 0 means safe , range[0,2]
-response=client.chat.completions.create(model=model, messages=messages,temperature = 2)
-# print(response)
+    brand_name = response.choices[0].message.content.strip()
 
-print("#######################################")
+    print("=" * 50)
+    print("🚀 Suggested Brand Name")
+    print("=" * 50)
+    print(brand_name)
+    print("=" * 50)
 
-answer=response.choices[0].message.content
-print(answer)
+except Exception as e:
+    print(f"❌ Error: {e}")
